@@ -15,10 +15,17 @@
     </div>
     <div class="updated">
       <div id="updated">—</div>
+      <div class="qual" id="qualNote">—</div>
       <div class="qual" id="taxNote">—</div>
       <div class="auto">Atualiza automaticamente a cada 3h (nuvem)</div>
     </div>
   </header>
+
+  <nav class="pagenav">
+    <button class="pagebtn active" data-page="funnel">📊 Funil</button>
+    <button class="pagebtn" data-page="obj">🧠 Objeções</button>
+    <button class="pagebtn" data-page="insights">💡 Insights</button>
+  </nav>
 
   <section class="controls">
     <div class="presets" id="presets"></div>
@@ -30,6 +37,7 @@
     </div>
   </section>
 
+  <div id="pageFunnel">
   <section class="grid">
     <div class="col-funnel">
       <div class="invest card">
@@ -65,6 +73,18 @@
       <div class="micro-note" id="attrNote"></div>
     </div>
   </section>
+  </div><!--/pageFunnel-->
+
+  <div id="pageObj" hidden>
+    <div class="card"><div class="chart-title">Objeções dos leads qualificados</div><div class="micro-note" id="objNote">—</div></div>
+    <div class="card"><div class="chart-title">Principal desafio <span class="sub" id="objN"></span></div><div id="objBars" class="objlist"></div></div>
+    <div class="card"><div class="chart-title">O que os qualificados relatam — na voz deles</div><div id="objVoices" class="voices"></div></div>
+  </div>
+
+  <div id="pageInsights" hidden>
+    <div class="card"><div class="chart-title">💡 Insights gerais do funil</div><div class="micro-note" id="insIntro">—</div></div>
+    <div id="insBody"></div>
+  </div>
 
   <footer class="foot">Cruzamento de: Queries (Meta) · Lista de leads · Vendas (Kiwify). Gasto com imposto ×1,1385. Somente leitura.</footer>
 </div>
