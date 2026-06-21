@@ -13,7 +13,7 @@ $BR=[Globalization.CultureInfo]::GetCultureInfo('pt-BR')
 # ---- fontes ----
 $QUERIES_ID='1RJC_VqNbRF8Xir_jQQ4KBdA0Bh9u4AUiDQPxr1sPEHU'; $QUERIES_GID='1160142252'
 $MASTER_ID ='1WuETdVje43yvMfyQDHO1PObXj_G9G-t6JjG6q987Z4o'
-$LEADS_GID ='2069413298'; $KIWIFY_GID='1987730935'
+$LEADS_GID ='603619749'; $KIWIFY_GID='1987730935'   # aba "leads para trafego" (bate com a contagem manual)
 $TAX=1.1385
 $QUAL_MENSAL=@('Entre R$ 100 mil e R$ 200 mil','Acima de 200 mil')
 
@@ -36,6 +36,7 @@ function BestEmailCol($hdr,$rows){ $best=-1; $max=0
   for($i=0;$i -lt $hdr.Count;$i++){ if((Norm $hdr[$i]) -notlike '*mail*'){continue}
     $c=0; foreach($r in $rows){ if($i -lt $r.Count -and $r[$i] -match '@'){ $c++ } }; if($c -gt $max){ $max=$c; $best=$i } }; return $best }
 function BrDate($s){ $s=Norm $s; if($s -match '^(\d{2})/(\d{2})/(\d{4})'){ return "$($Matches[3])-$($Matches[2])-$($Matches[1])" }; return '' }
+function LeadDate($s){ $s=Norm $s; if($s -match '^(\d{4}-\d{2}-\d{2})'){ return $Matches[1] }; return (BrDate $s) }
 function Deaccent($s){ if($null -eq $s){return ''}; $s=$s.Normalize([Text.NormalizationForm]::FormD); $sb=New-Object Text.StringBuilder
   foreach($c in $s.ToCharArray()){ if([Globalization.CharUnicodeInfo]::GetUnicodeCategory($c) -ne [Globalization.UnicodeCategory]::NonSpacingMark){ [void]$sb.Append($c) } }; return $sb.ToString().ToLower() }
 $OBJ_BUCKETS=@(
@@ -65,7 +66,8 @@ $k=Read-Csv $kCsv; $kh=$k[0]; $kd=$k[1..($k.Count-1)]
 $Q_DAY=HdrIndex $qh 'Day'; $Q_CAMP=HdrIndex $qh 'Campaign Name'; $Q_SET=HdrIndex $qh 'Ad Set Name'; $Q_AD=HdrIndex $qh 'Ad Name'
 $Q_SPEND=HdrIndex $qh 'Amount Spent'; $Q_IMP=HdrIndex $qh 'Impressions'; $Q_CLK=HdrIndex $qh 'Link Clicks'; $Q_LPV=HdrIndex $qh 'Landing Page Views'
 $L_EMAIL=BestEmailCol $lh $ld; $L_CAMP=HdrIndex $lh 'utm_campaign'; $L_SET=HdrIndex $lh 'utm_medium'; $L_CONT=HdrIndex $lh 'utm_content'
-$L_DATE=HdrLike $lh '*Submitted*'; $L_FAT=HdrLike $lh '*faturamento mensal*'; $L_DESAFIO=HdrLike $lh '*principal desafio*'
+$L_DATE=HdrIndex $lh 'Data Formatada'; if($L_DATE -lt 0){ $L_DATE=HdrLike $lh '*Submitted*' }
+$L_FAT=HdrLike $lh '*faturamento mensal*'; $L_DESAFIO=HdrLike $lh '*principal desafio*'
 $K_STAT=HdrIndex $kh 'Status'; $K_EMAIL=HdrIndex $kh 'Email'; $K_DATE=HdrIndex $kh 'Data Simplificada'; $K_REV=HdrLike $kh 'Total com acr*'
 
 # ---- DAILY ----
@@ -73,7 +75,7 @@ $daily=@{}
 function GetDay($d){ if(-not $daily.ContainsKey($d)){ $daily[$d]=[pscustomobject]@{date=$d;spend=0.0;impr=0;clicks=0;lpv=0;leads=0;qlf=0;sales=0;revenue=0.0} }; return $daily[$d] }
 foreach($r in $qd){ $d=Norm $r[$Q_DAY]; if($d -notmatch '^\d{4}-\d{2}-\d{2}$'){continue}
   $o=GetDay $d; $o.spend+=(MoneyBR $r[$Q_SPEND])*$TAX; $o.impr+=ToInt $r[$Q_IMP]; $o.clicks+=ToInt $r[$Q_CLK]; $o.lpv+=ToInt $r[$Q_LPV] }
-foreach($r in $ld){ $d=BrDate $r[$L_DATE]; if($d -eq ''){continue}; $o=GetDay $d; $o.leads++; if((Norm $r[$L_FAT]) -in $QUAL_MENSAL){ $o.qlf++ } }
+foreach($r in $ld){ $d=LeadDate $r[$L_DATE]; if($d -eq ''){continue}; $o=GetDay $d; $o.leads++; if((Norm $r[$L_FAT]) -in $QUAL_MENSAL){ $o.qlf++ } }
 foreach($r in $kd){ if((Norm $r[$K_STAT]) -ne 'paid'){continue}; $d=BrDate $r[$K_DATE]; if($d -eq ''){continue}; $o=GetDay $d; $o.sales++; $o.revenue+=(MoneyKiwify $r[$K_REV]) }
 
 # ---- GRAIN ----
@@ -88,7 +90,7 @@ foreach($r in $ld){ $e=(Norm $r[$L_EMAIL]).ToLower(); if($e -eq ''){continue}; $
 $objQlf=@{}
 function GetObj($d,$b){ $key="$d`u$b"; if(-not $objQlf.ContainsKey($key)){ $objQlf[$key]=[pscustomobject]@{date=$d;bucket=$b;qlf=0} }; return $objQlf[$key] }
 $qVerb=@{}
-foreach($r in $ld){ $d=BrDate $r[$L_DATE]; if($d -eq ''){continue}
+foreach($r in $ld){ $d=LeadDate $r[$L_DATE]; if($d -eq ''){continue}
   $c=Norm $r[$L_CAMP]; if($c -eq ''){$c='SEM_UTM'}; $s=Norm $r[$L_SET]; if($s -eq ''){$s='SEM_UTM'}; $a=AdCode $r[$L_CONT]; if($a -eq ''){$a='SEM_UTM'}
   $o=GetGrain $d $c $s $a; $o.leads++
   $isq=(Norm $r[$L_FAT]) -in $QUAL_MENSAL
