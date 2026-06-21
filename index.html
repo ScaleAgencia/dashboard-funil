@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — Funil de Tráfego (Meta Ads)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div>
+      <h1>FUNIL — META ADS</h1>
+      <div class="client">Dashboard de Tráfego</div>
+    </div>
+    <div class="updated">
+      <div id="updated">—</div>
+      <div class="qual" id="taxNote">—</div>
+      <div class="auto">Atualiza automaticamente a cada 3h (nuvem)</div>
+    </div>
+  </header>
+
+  <section class="controls">
+    <div class="presets" id="presets"></div>
+    <div class="custom">
+      <label>De <input type="date" id="dStart"></label>
+      <label>até <input type="date" id="dEnd"></label>
+      <button id="applyRange">Aplicar</button>
+      <span class="rangelbl" id="rangeLbl"></span>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="col-funnel">
+      <div class="invest card">
+        <div class="invest-head"><span>Investimento com imposto</span><span class="goal-edit">Meta: R$ <input type="number" id="goalInput" step="500"></span></div>
+        <div class="invest-val" id="investVal">R$ 0,00</div>
+        <div class="invest-pct" id="investPct">0%</div>
+        <div class="bar"><div class="bar-fill" id="investBar"></div></div>
+        <div class="invest-foot"><span id="goalLbl">—</span></div>
+      </div>
+      <div id="funnel"></div>
+    </div>
+    <div class="col-charts">
+      <div class="card chart-card"><div class="chart-title">Leads x Vendas por dia</div><div id="chartLeads" class="chart"></div>
+        <div class="legend"><span class="dot a"></span>Leads <span class="dot b"></span>Vendas</div></div>
+      <div class="card chart-card"><div class="chart-title">Investimento x CPL por dia</div><div id="chartSpend" class="chart"></div>
+        <div class="legend"><span class="dot c"></span>Investimento (R$) <span class="dot d"></span>CPL (R$)</div></div>
+    </div>
+  </section>
+
+  <section class="tables">
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" data-level="campaign">Campanhas</button>
+        <button class="tab" data-level="adset">Conjuntos</button>
+        <button class="tab" data-level="ad">Anúncios</button>
+        <div class="micro-note">Otimização — ordene por CPL ou CAC pra achar onde o resultado sai mais barato</div>
+      </div>
+      <div class="table-scroll"><table id="optTable"><thead></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="chart-title">Vendas por campanha (cruzando comprador × lead)</div>
+      <div class="table-scroll"><table id="salesTable"><thead></thead><tbody></tbody></table></div>
+      <div class="micro-note" id="attrNote"></div>
+    </div>
+  </section>
+
+  <footer class="foot">Cruzamento de: Queries (Meta) · Lista de leads · Vendas (Kiwify). Gasto com imposto ×1,1385. Somente leitura.</footer>
+</div>
+<script>(function(){var v=Date.now();['data.js','app.js'].forEach(function(f){document.write('<script src="'+f+'?t='+v+'"><\/script>');});})();</script>
+</body>
+</html>
